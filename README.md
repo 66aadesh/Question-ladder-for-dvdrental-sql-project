@@ -1,6 +1,6 @@
 # 📊 SQL Practice Using the DVD Rental Database
 
-Welcome! I'm **Aditya Dixit**, a **Data Engineering Enthusiast** passionate about problem-solving and continuous learning.
+Welcome! I'm **Aditya Dixit**, a **Data Analytics and Data Engineering Enthusiast** passionate about problem-solving and continuous learning.
 
 This project is the result of my effort to build a structured and progressive SQL practice system using the classic `dvdrental` sample database. With guidance from **ChatGPT** and a foundation from Jose Portilla's Udemy course, I designed and solved my own LeetCode-style SQL challenges to strengthen query logic, optimization skills, and real-world application.
 

@@ -1,0 +1,237 @@
+### Hard Questions (30-44):
+
+*(Hint: Focus on subqueries, CTEs, advanced joins, and window functions.)*
+
+30. **Identify the top 3 customers by total rentals.**
+    - Output: `customer_id`, `first_name`, `rental_count`
+- Answer: -
+    
+    ```sql
+    SELECT customer.customer_id, first_name, COUNT(*) as count FROM customer
+    JOIN rental ON rental.customer_id = customer.customer_id
+    GROUP BY customer.customer_id
+    ORDER BY count DESC
+    LIMIT 3;
+    
+    ```
+    
+    ---
+    
+31. **Calculate the revenue generated per movie category.**
+    - Output: `category_name`, `total_revenue`
+- Answer: -
+    
+    ```sql
+    
+    SELECT category.name AS category_name, SUM(payment.amount) AS total_revenue FROM category
+    JOIN film_category ON film_category.category_id = category.category_id
+    JOIN inventory ON inventory.film_id = film_category.film_id
+    JOIN rental ON rental.inventory_id = inventory.inventory_id
+    JOIN payment ON payment.rental_id = rental.rental_id
+    GROUP BY category_name
+    ```
+    
+    ---
+    
+32. **Find the average monthly rentals for the year 2005.**
+    - Output: `month`, `average_rentals`
+- Answer: -
+    
+    ```sql
+    SELECT
+    FROM 
+    
+    ```
+    
+    ---
+    
+33. **Determine the percentage contribution of each movie to the total revenue.**
+    - Output: `title`, `revenue_percentage`
+- Answer: -
+    
+    ```sql
+    WITH total_revenue AS (
+        SELECT SUM(amount) AS total FROM payment
+    )
+    SELECT 
+        film.title AS title, 
+        ROUND((SUM(payment.amount) / total_revenue.total) * 100, 2) AS revenue_percentage
+    FROM film
+    JOIN inventory ON film.film_id = inventory.film_id
+    JOIN rental ON inventory.inventory_id = rental.inventory_id
+    JOIN payment ON rental.rental_id = payment.rental_id
+    CROSS JOIN total_revenue  -- Use CROSS JOIN instead of a subquery
+    GROUP BY film.title, total_revenue.total  -- Group by total to ensure reference
+    ORDER BY revenue_percentage DESC;
+    
+    ```
+    
+    ---
+    
+34. **List the top 5 languages with the highest number of movies.**
+    - Output: `language_name`, `film_count`
+- Answer: -
+    
+    ```sql
+    SELECT language.name AS language_name, COUNT(film.film_id) AS film_count FROM language
+    JOIN film ON language.language_id = film.language_id
+    GROUP BY language.name
+    ORDER BY film_count DESC
+    LIMIT 5;
+    ```
+    
+    ---
+    
+35. **Find customers who rented the same movie more than once.**
+    - Output: `customer_id`, `title`
+- Answer: -
+    
+    ```sql
+    WITH rental_counts AS (
+        SELECT 
+            customer.customer_id, 
+            film.title,
+            COUNT(rental.rental_id) AS rental_count
+        FROM rental
+        JOIN inventory ON rental.inventory_id = inventory.inventory_id
+        JOIN film ON inventory.film_id = film.film_id
+        JOIN customer ON rental.customer_id = customer.customer_id
+        GROUP BY customer.customer_id, film.title
+    )
+    SELECT customer_id, title
+    FROM rental_counts
+    WHERE rental_count > 1
+    ORDER BY customer_id, title;
+    
+    ```
+    
+    ---
+    
+36. **Identify movies that have earned more revenue than the average movie revenue.**
+    - Output: `title`, `revenue`
+- Answer: -
+    
+    ```sql
+    WITH average_revenue AS (
+    	SELECT ROUND(AVG(payment.amount),3) AS average_movie_revenue FROM payment 
+    )
+    SELECT film.title, SUM(payment.amount) AS revenue FROM film
+    JOIN inventory ON inventory.film_id = film.film_id
+    JOIN rental ON rental.inventory_id = inventory.inventory_id
+    JOIN payment ON payment.rental_id = rental.rental_id
+    CROSS JOIN average_revenue
+    GROUP BY film.title, average_revenue.average_movie_revenue
+    HAVING SUM(payment.amount)> average_revenue.average_movie_revenue
+    ORDER BY revenue DESC
+    ```
+    
+    ---
+    
+37. **Rank all customers by their total spending.**
+    - Output: `rank`, `customer_id`, `total_spending`
+- Answer: -
+    
+    ```sql
+    WITH customer_spending AS (
+        SELECT 
+            customer.customer_id, 
+            SUM(payment.amount) AS total_spending
+        FROM customer
+        JOIN payment ON customer.customer_id = payment.customer_id
+        GROUP BY customer.customer_id
+    )
+    SELECT 
+        RANK() OVER (ORDER BY total_spending DESC) AS rank,
+        customer_id,
+        total_spending
+    FROM customer_spending
+    ORDER BY rank;
+    
+    ```
+    
+    ---
+    
+38. **Determine the day with the highest number of rentals.**
+    - Output: `date`, `rental_count`
+- Answer: -
+    
+    ```sql
+    SELECT 
+        DATE(rental_date) AS rental_day,  -- Convert timestamp to date (removes time)
+        COUNT(rental_id) AS rental_count
+    FROM rental
+    GROUP BY rental_day
+    ORDER BY rental_count DESC
+    LIMIT 1;
+    
+    WITH rental_counts AS (
+        SELECT 
+            DATE(rental_date) AS rental_day,
+            COUNT(rental_id) AS rental_count
+        FROM rental
+        GROUP BY rental_day
+    )
+    SELECT rental_day, rental_count
+    FROM rental_counts
+    WHERE rental_count = (SELECT MAX(rental_count) FROM rental_counts)
+    ORDER BY rental_day;
+    ```
+    
+    ---
+    
+39. **Find the actor who appeared in the most movies.**
+    - Output: `actor_id`, `first_name`, `last_name`, `movie_count`
+- Answer: -
+    
+    ```sql
+    WITH ranked_actors AS (
+        SELECT 
+            actor.actor_id, 
+            actor.first_name, 
+            actor.last_name, 
+            COUNT(film_actor.film_id) AS movie_count,
+            DENSE_RANK() OVER (ORDER BY COUNT(film_actor.film_id) DESC) AS rank
+        FROM actor
+        JOIN film_actor ON actor.actor_id = film_actor.actor_id
+        GROUP BY actor.actor_id
+    )
+    SELECT * 
+    FROM ranked_actors
+    WHERE rank = 1;
+    
+    WITH actor_movie_counts AS (
+        SELECT 
+            actor.actor_id, 
+            actor.first_name, 
+            actor.last_name, 
+            COUNT(film_actor.film_id) AS movie_count
+        FROM actor
+        JOIN film_actor ON actor.actor_id = film_actor.actor_id
+        GROUP BY actor.actor_id
+    )
+    SELECT * 
+    FROM actor_movie_counts
+    WHERE movie_count = (SELECT MAX(movie_count) FROM actor_movie_counts)
+    ORDER BY first_name, last_name;
+    
+    SELECT actor.actor_id, actor.first_name, actor.last_name, COUNT(film_actor.film_id) AS movie_count
+    FROM actor
+    JOIN film_actor ON actor.actor_id = film_actor.actor_id
+    GROUP BY actor.actor_id
+    ORDER BY movie_count DESC
+    LIMIT 1;
+    
+    ```
+    
+    ---
+    
+40. **Calculate the average return time for rentals.**
+    - Output: `average_return_time`
+41. **List all movies that were rented within 7 days of their release.**
+    - Output: `title`, `rental_date`
+42. **Find the store with the highest revenue.**
+    - Output: `store_id`, `total_revenue`
+43. **Identify the customer with the longest active rental period.**
+    - Output: `customer_id`, `first_name`, `total_rental_days`
+44. **Determine the rental pattern: weekdays vs weekends.**
+    - Output: `day_type`, `rental_count`

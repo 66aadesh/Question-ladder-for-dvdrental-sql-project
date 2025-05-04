@@ -1,0 +1,14 @@
+### Very Hard Questions (45-50):
+
+*(Hint: Use recursive CTEs, complex aggregations, and intricate logic.)*
+
+45. **Find the revenue trend for the top 3 earning movies month over month.**
+    - Output: `title`, `month`, `monthly_revenue`
+46. **List customers who contributed to the top 10% of total revenue.**
+    - Output: `customer_id`, `first_name`, `total_revenue`
+47. **Determine the rental frequency distribution (e.g., 1-5 rentals, 6-10 rentals, etc.).**
+    - Output: `rental_range`, `customer_count`
+48. **Analyze the revenue impact of movie replacement costs.**
+    - Output: `replacement_cost_range`, `total_revenue`
+49. **Build a timeline showing the growth of the customer base over time.**
+    - Output: `month`, `new_customers`

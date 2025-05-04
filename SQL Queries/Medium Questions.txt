@@ -1,0 +1,459 @@
+### Medium Questions (15-29):
+
+*(Hint: Combine data from multiple tables, use aggregate functions, and introduce basic joins.)*
+
+15. **Find the most rented movie.**
+    - Output: `title`, `rental_count`
+- Answer: -
+    
+    Great effort! You're on the right track, but there are a few syntax and logical errors to correct. Let's go through them step by step.
+    
+    ```sql
+    my answer-
+    
+    SELECT title, COUNT(renatal.rental_id) AS rental_count FROM film
+    JOIN inventory ON inventory.film_id = film.film_id
+    JOIN rental ON rental.inventory_id = inventory.inventory_id
+    GROUP BY rental.rental_id
+    ORDER BY DESC
+    ```
+    
+    ---
+    
+    ### **Errors in Your Query:**
+    
+    1. **Typo in Table Alias**
+        - You wrote `COUNT(renatal.rental_id)`, but it should be `COUNT(rental.rental_id)`.
+    2. **Incorrect `GROUP BY` Clause**
+        - You're grouping by `rental.rental_id`, but since you want to count rentals **per movie**, you should group by `film.title`.
+    3. **Syntax Error in `ORDER BY`**
+        - The correct syntax is `ORDER BY rental_count DESC`, not `ORDER BY DESC`.
+    
+    ---
+    
+    ### **Corrected Query:**
+    
+    ```sql
+    SELECT film.title, COUNT(rental.rental_id) AS rental_count
+    FROM film
+    JOIN inventory ON inventory.film_id = film.film_id
+    JOIN rental ON rental.inventory_id = inventory.inventory_id
+    GROUP BY film.title
+    ORDER BY rental_count DESC
+    LIMIT 1;
+    
+    ```
+    
+    ---
+    
+    ### **Explanation of Fixes:**
+    
+    ✅ **Corrected the table alias:** Changed `renatal.rental_id` to `rental.rental_id`.
+    
+    ✅ **Fixed `GROUP BY`:** Now it groups by `film.title` so we get rentals per movie, not per rental.
+    
+    ✅ **Fixed `ORDER BY`:** `ORDER BY rental_count DESC` correctly sorts by the highest rental count.
+    
+    ✅ **Added `LIMIT 1`:** This ensures we get **only the most rented movie** instead of a full ranking.
+    
+    ---
+    
+    ### **Your Thought Process:**
+    
+    - You correctly **joined the right tables**: `film`, `inventory`, and `rental`. ✅
+    - You knew that **counting `rental_id`** would give rental frequency. ✅
+    - You knew **ordering by rental count** is needed. ✅
+    
+    💡 **Key Learning Points:**
+    
+    - **Think about grouping carefully**: If you're counting per movie, group by `title`, not `rental_id`.
+    - **Watch out for typos**: Small spelling mistakes (`renatal` instead of `rental`) can cause errors.
+    - **SQL syntax matters**: `ORDER BY DESC` needs to specify a column (`ORDER BY rental_count DESC`).
+    
+    You're getting **really close** to writing perfect queries. Keep going! 🚀
+    
+16. **List the top 5 cities with the highest number of customers.**
+    - Output: `city`, `customer_count`
+- Answer: -
+    
+    ```sql
+    SELECT city.city, COUNT(customer_id) AS customer_count FROM customer
+    JOIN address ON address.address_id = customer.address_id
+    JOIN city ON city.city_id = address.city_id
+    GROUP BY city.city
+    ORDER BY COUNT(customer_id) DESC --ORDER BY customer_count DESC for clarity
+    LIMIT 5;
+    ```
+    
+    ---
+    
+17. **Retrieve all movies and their respective categories.**
+    - Output: `title`, `category_name`
+- Answer: -
+    
+    ```sql
+    SELECT title, category.name FROM film
+    JOIN film_category ON film.film_id = film_category.film_id
+    JOIN category ON film_category.category_id = category.category_id
+    ```
+    
+    ---
+    
+18. **Calculate the average rental duration for all movies.**
+    - Output: `average_rental_duration`
+- Answer: -
+    
+    ```sql
+    
+    SELECT AVG(rental_duration) AS average_rental_duration
+    FROM film
+    GROUP BY film_id
+    ORDER BY average_rental_duration DESC
+    ```
+    
+    You're very close, and I love how you're applying SQL concepts! However, there's **one key mistake** that needs to be fixed.
+    
+    ---
+    
+    ### **Issues in Your Query:**
+    
+    1. **Unnecessary `GROUP BY film_id`**
+        - The `GROUP BY film_id` is **not needed** because you want the **overall** average rental duration, not per movie.
+        - `GROUP BY` is used when you want separate averages **for each movie**, but here you need a **single** value.
+    2. **Incorrect `ORDER BY`**
+        - Since we are computing a **single** average value, `ORDER BY` is unnecessary because there's only **one row** in the output.
+    
+    ---
+    
+    ### **Corrected Query:**
+    
+    ```sql
+    SELECT AVG(rental_duration) AS average_rental_duration
+    FROM film;
+    
+    ```
+    
+    ---
+    
+    ### **Why This Works:**
+    
+    ✅ **Removes `GROUP BY`** so the query calculates **one** average value for all movies.
+    
+    ✅ **Removes `ORDER BY`** because there's **only one result**, so no need to sort.
+    
+    ---
+    
+    ### **Your Thought Process (and How to Improve It)**
+    
+    ✅ You **correctly identified** that `AVG(rental_duration)` should be used.
+    
+    ✅ You knew the **`film` table** stores rental duration data.
+    
+    🔹 You **over-applied `GROUP BY`** when it wasn't needed.
+    
+    🔹 You added `ORDER BY`, which isn't necessary for a single-row result.
+    
+    💡 **Key Takeaway:**
+    
+    👉 Use `GROUP BY` only if you need averages **per category** (e.g., per movie).
+    
+    👉 If you're calculating a **single overall metric**, `GROUP BY` isn't needed.
+    
+    You're doing **really well!** Keep up the amazing work! 🚀🔥
+    
+    ---
+    
+19. **Find the total revenue generated by rentals.**
+    - Output: `total_revenue`
+- Answer: -
+    
+    ```sql
+    
+    SELECT SUM(amount) FROM payment AS total_revenue
+    ```
+    
+    ---
+    
+20. **List all movies rented by customer ID 15.**
+    - Output: `title`, `rental_date`
+- Answer: -
+    
+    ```sql
+    --my asnwer
+    
+    SELECT film.title, rental_date FROM rental
+    JOIN customer ON customer.customer_id = rental.customer_id
+    JOIN inventory ON inventory.inventory_id = rental.inventory_id
+    JOIN film ON film.film_id = inventory.film_id
+    WHERE customer.customer_id = 15
+    
+    --ChatGPT
+    
+    SELECT film.title, rental.rental_date 
+    FROM rental
+    JOIN inventory ON inventory.inventory_id = rental.inventory_id
+    JOIN film ON film.film_id = inventory.film_id
+    WHERE rental.customer_id = 15;
+    
+    ```
+    
+    You're very close, and I love how you're applying SQL concepts! However, there's **one key mistake** that needs to be fixed.
+    
+    ---
+    
+    ### **Issues in Your Query:**
+    
+    1. **Unnecessary `GROUP BY film_id`**
+        - The `GROUP BY film_id` is **not needed** because you want the **overall** average rental duration, not per movie.
+        - `GROUP BY` is used when you want separate averages **for each movie**, but here you need a **single** value.
+    2. **Incorrect `ORDER BY`**
+        - Since we are computing a **single** average value, `ORDER BY` is unnecessary because there's only **one row** in the output.
+    
+    ---
+    
+    ### **Corrected Query:**
+    
+    ```sql
+    SELECT AVG(rental_duration) AS average_rental_duration
+    FROM film;
+    
+    ```
+    
+    ---
+    
+    ### **Why This Works:**
+    
+    ✅ **Removes `GROUP BY`** so the query calculates **one** average value for all movies.
+    
+    ✅ **Removes `ORDER BY`** because there's **only one result**, so no need to sort.
+    
+    ---
+    
+    ### **Your Thought Process (and How to Improve It)**
+    
+    ✅ You **correctly identified** that `AVG(rental_duration)` should be used.
+    
+    ✅ You knew the **`film` table** stores rental duration data.
+    
+    🔹 You **over-applied `GROUP BY`** when it wasn't needed.
+    
+    🔹 You added `ORDER BY`, which isn't necessary for a single-row result.
+    
+    💡 **Key Takeaway:**
+    
+    👉 Use `GROUP BY` only if you need averages **per category** (e.g., per movie).
+    
+    👉 If you're calculating a **single overall metric**, `GROUP BY` isn't needed.
+    
+    You're doing **really well!** Keep up the amazing work! 🚀🔥
+    
+    ---
+    
+21. **Identify customers who haven’t rented any movies.**
+    - Output: `customer_id`, `first_name`, `last_name`
+- Answer: -
+    
+    ```sql
+    
+    SELECT customer_id, first_name, last_name FROM customer
+    WHERE customer.customer_id NOT IN rental.customer_id
+    ```
+    
+    Great effort! You're thinking in the right direction. Let's go step by step and fix the error.
+    
+    ---
+    
+    ### ❌ **What Went Wrong?**
+    
+    1. **Syntax Issue**:
+        - `NOT IN rental.customer_id` is incorrect.
+        - You need to use **a subquery** inside `NOT IN` to fetch `customer_id` values from the `rental` table.
+    2. **Better Approach**:
+        - Use `NOT EXISTS` or `LEFT JOIN ... WHERE rental.customer_id IS NULL`.
+        - `NOT EXISTS` is usually more efficient.
+    
+    ---
+    
+    ### ✅ **Corrected Query (Using `NOT IN`)**
+    
+    ```sql
+    SELECT customer_id, first_name, last_name
+    FROM customer
+    WHERE customer_id NOT IN (SELECT DISTINCT customer_id FROM rental);
+    
+    ```
+    
+    🔹 **Fixes applied:**
+    
+    - Used a **subquery** inside `NOT IN`.
+    - `DISTINCT customer_id` ensures better performance.
+    
+    ---
+    
+    ### 🚀 **Alternative (Using `NOT EXISTS`)**
+    
+    ```sql
+    SELECT customer_id, first_name, last_name
+    FROM customer c
+    WHERE NOT EXISTS (
+        SELECT 1 FROM rental r WHERE r.customer_id = c.customer_id
+    );
+    
+    ```
+    
+    🔹 **Why This is Better?**
+    
+    - **More efficient** in large datasets.
+    - `NOT EXISTS` stops checking once it finds a match (unlike `NOT IN`).
+    
+    ---
+    
+    ### 🔥 **Best Approach (Using `LEFT JOIN`)**
+    
+    ```sql
+    SELECT c.customer_id, c.first_name, c.last_name
+    FROM customer c
+    LEFT JOIN rental r ON c.customer_id = r.customer_id
+    WHERE r.customer_id IS NULL;
+    
+    ```
+    
+    🔹 **Why `LEFT JOIN`?**
+    
+    - Finds all customers and brings rental data (if exists).
+    - If `r.customer_id` is `NULL`, it means the customer **never rented a movie**.
+    
+    ---
+    
+    ### 🌟 **Final Thoughts**
+    
+    You're making great progress! 🚀
+    
+    Your logic was correct, just needed some syntax adjustments.
+    
+    Keep solving questions, and don't hesitate to experiment with different solutions. **You're improving every day!** 💪😊
+    
+    ---
+    
+22. **Find the movie category with the highest average rental duration.**
+    - Output: `category_name`, `average_duration`
+- Answer: -
+    
+    ```sql
+    SELECT name AS category_name, AVG(film.rental_duration) AS average_duration FROM category
+    JOIN film_category ON film_category.category_id = category.category_id
+    JOIN film ON film.film_id = film_category.film_id
+    GROUP BY category.name
+    ORDER BY average_duration DESC
+    
+    ```
+    
+    ---
+    
+23. **Determine the staff member who has processed the most rentals.**
+    - Output: `staff_id`, `rental_count`
+- Answer: -
+    
+    ```sql
+    
+    SELECT staff.staff_id, COUNT(rental.rental_id) AS rental_count FROM staff
+    JOIN rental ON rental.staff_id = staff.staff_id
+    GROUP BY staff.staff_id
+    ORDER BY rental_count DESC
+    ```
+    
+    ---
+    
+24. **List all movies with more than 5 copies in inventory.**
+    - Output: `title`, `copy_count`
+- Answer: -
+    
+    ```sql
+    
+    SELECT film.title, COUNT(inventory.inventory_id) AS copy_count FROM film
+    JOIN inventory ON film.film_id = inventory.film_id
+    GROUP BY film.title
+    HAVING COUNT(inventory.inventory_id)>5
+    ORDER BY copy_count DESC
+    
+    ```
+    
+    ---
+    
+    ### 🛠 **Suggested Improvement:**
+    
+    🔹 **Fix the `HAVING` Clause** → PostgreSQL **doesn’t recognize `copy_count` directly in HAVING**, because it’s an alias. Instead, you need to reference `COUNT(inventory.inventory_id)`.
+    
+25. **Find the total number of movies in each category.**
+    - Output: `category_name`, `film_count`
+- Answer: -
+    
+    ```sql
+    
+    SELECT category.name AS category_name, COUNT(film.film_id) AS film_count FROM category
+    JOIN film_category ON film_category.category_id = category.category_id
+    JOIN film ON film.film_id = film_category.film_id
+    GROUP BY category.name
+    ORDER BY film_count DESC
+    ```
+    
+    ---
+    
+26. **Calculate the average rental rate for movies in each language.**
+    - Output: `language`, `average_rental_rate`
+- Answer: -
+    
+    ```sql
+    
+    SELECT language.name AS language, AVG(rental_rate) AS average_rental_rate FROM language
+    JOIN film ON film.language_id = language.language_id
+    GROUP BY language.language_id
+    ORDER BY average_rental_rate DESC
+    ```
+    
+    ---
+    
+27. **Identify movies that have not been rented in the last year.**
+    - Output: `title`
+- Answer: -
+    
+    ```sql
+    
+    ```
+    
+    ---
+    
+28. **List customers who have rented movies from more than one store.**
+    - Output: `customer_id`, `first_name`, `last_name`
+- Answer: -
+    
+    ```sql
+    SELECT c.customer_id, c.first_name, c.last_name
+    FROM rental r
+    JOIN inventory i ON r.inventory_id = i.inventory_id
+    JOIN customer c ON r.customer_id = c.customer_id
+    GROUP BY c.customer_id, c.first_name, c.last_name
+    HAVING COUNT(DISTINCT i.store_id) > 1;
+    
+    ```
+    
+    ---
+    
+29. **Find the most common rental duration for movies.**
+    - Output: `rental_duration`, `count`
+- Answer: -
+    
+    ```sql
+    -- my answer
+    SELECT MODE() WITHIN GROUP (ORDER BY rental_duration) AS rental_duration FROM film
+    
+    -- chatGPT optimised answer
+    SELECT rental_duration, COUNT(*) AS count
+    FROM film
+    GROUP BY rental_duration
+    ORDER BY count DESC
+    LIMIT 1;
+    
+    ```
+    
+    ---

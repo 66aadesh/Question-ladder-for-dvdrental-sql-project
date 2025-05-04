@@ -1,0 +1,153 @@
+### Easy Questions (1-15):
+
+1. **List all the actors in the database.**
+    - Output: `actor_id`, `first_name`, `last_name`
+- Answer: -
+    
+    ```sql
+    SELECT * FROM actor;
+    ```
+    
+2. **Display the titles of all movies in the database.**
+    - Output: `title`
+- Answer: -
+    
+    ```sql
+    SELECT title FROM film;
+    ```
+    
+3. **Find all customers who live in the city of “Aurora.”**
+    - Output: `customer_id`, `first_name`, `last_name`
+- Answer: -
+    
+    ```sql
+    SELECT customer.customer_id, customer.first_name, customer.last_name 
+    FROM customer
+    JOIN address ON customer.address_id = address.address_id
+    JOIN city ON address.city_id = city.city_id
+    WHERE city.city = 'Aurora';
+    ```
+    
+4. **Retrieve all staff members and their email addresses.**
+    - Output: `staff_id`, `first_name`, `email`
+- Answer: -
+    
+    ```sql
+    SELECT staff_id, first_name, email FROM staff
+    ```
+    
+5. **List the names of all stores along with their addresses.**
+    - Output: `store_id`, `address`
+- Answer: -
+    
+    ```sql
+    SELECT store_id, address.address FROM store
+    JOIN address ON store.address_id = address.address_id
+    ```
+    
+6. **Find the inventory IDs for a movie titled “Academy Dinosaur.”**
+    - Output: `inventory_id`
+- Answer: -
+    
+    ```sql
+    SELECT inventory_id FROM inventory
+    JOIN film ON film.film_id = inventory.film_id
+    WHERE film.title = 'Academy Dinosaur'
+    ```
+    
+7. **Count the total number of films available in the database.**
+    - Output: Total count as `film_count`
+- Answer: -
+    
+    ```sql
+    SELECT COUNT(film_id) AS film_count FROM film
+    ```
+    
+8. **Find the total number of customers.**
+    - Output: Total count as `customer_count`
+- Answer: -
+    
+    ```sql
+    SELECT COUNT(customer_id) AS customer_count FROM customer
+    ```
+    
+9. **Retrieve the film categories available in the store.**
+    - Output: `category_id`, `name`
+- Answer: -
+    
+    ```sql
+    SELECT category_id, name FROM category
+    ```
+    
+10. **Find all rental records for customer ID 5.**
+    - Output: `rental_id`, `rental_date`, `inventory_id`, `return_date`
+- Answer: -
+    
+    ```sql
+    SELECT rental_id, rental_date, inventory_id, return_date FROM rental
+    JOIN customer ON customer.customer_id = rental.customer_id
+    WHERE customer.customer_id = 5
+    ```
+    
+11. **List all movies rented on July 4, 2005.**
+    - Output: `rental_id`, `inventory_id`, `rental_date`
+- Answer: -
+    
+    
+    ### **Your Thought Process:**
+    
+    ✅ Correctly identified that filtering by date is needed.
+    
+    ✅ Used `BETWEEN`, which is a reasonable choice but has slight precision issues.
+    
+    ✅ Used explicit date and time formatting, which is a good practice.
+    
+    💡 **Key Takeaways:**
+    
+    - Your logic is **correct**; just refining it makes it more precise.
+    - SQL datetime filtering often requires careful boundary conditions.
+    - Keep going! You're thinking like a data analyst already.
+    
+    You're doing great! Keep practicing, and you'll gain confidence. 🚀
+    
+    ```sql
+    SELECT rental_id, inventory_id, rental_date FROM rental
+    WHERE rental_date BETWEEN '2005-07-04 00:00:00' AND '2005-07-04 23:59:59'
+    
+    --Why is this better?
+    --Inclusive of all timestamps:
+    --Your approach (BETWEEN '2005-07-04 00:00:00' AND '2005-07-04 23:59:59') works, but if there are milliseconds or microseconds stored in rental_date, some entries right before midnight (23:59:59.999) might be missed.
+    --Using < '2005-07-05 00:00:00' ensures we capture everything up until the start of July 5.
+    
+    SELECT rental_id, inventory_id, rental_date
+    FROM rental
+    WHERE rental_date >= '2005-07-04 00:00:00' 
+    AND rental_date < '2005-07-05 00:00:00';
+    
+    ```
+    
+12. **Identify the languages in which movies are available.**
+    - Output: `language_id`, `name`
+- Answer: -
+    
+    ```sql
+    SELECT language_id, name FROM laguage
+    ```
+    
+13. **Find all movies with a replacement cost greater than $20.**
+    - Output: `film_id`, `title`, `replacement_cost`
+- Answer: -
+    
+    ```sql
+    SELECT film_id, title, replacement_cost FROM film
+    WHERE replacement_cost >20
+    ```
+    
+14. **List all active customers.**
+    - Output: `customer_id`, `first_name`, `last_name`, `active`
+- Answer: -
+    
+    ```sql
+    SELECT film_id, title, replacement_cost FROM film
+    WHERE replacement_cost >20
+    ```
